@@ -1,0 +1,6 @@
+[algokit]
+min_version = "v1.8.0"
+
+[project]
+type = 'workspace'
+projects_root_path = 'projects'
