@@ -451,24 +451,33 @@ buy:
     // ) -> None:
     proto 3 0
     // smart_contracts/digital_marketplace/contract.py:79
+    // assert self.unitary_price.value != pup.UInt64(0)
+    int 0
+    byte "unitary_price"
+    app_global_get_ex
+    assert // check value exists
+    int 0
+    !=
+    assert
+    // smart_contracts/digital_marketplace/contract.py:81
     // decoded_quantity = quantity.decode()
     frame_dig -2
     btoi
-    // smart_contracts/digital_marketplace/contract.py:80
+    // smart_contracts/digital_marketplace/contract.py:82
     // assert buyer_txn.sender == pup.Txn.sender
     frame_dig -3
     gtxns Sender
     txn Sender
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:81
+    // smart_contracts/digital_marketplace/contract.py:83
     // assert buyer_txn.receiver == pup.Global.current_application_address
     frame_dig -3
     gtxns Receiver
     global CurrentApplicationAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:82
+    // smart_contracts/digital_marketplace/contract.py:84
     // assert buyer_txn.amount == self.unitary_price.value * decoded_quantity
     frame_dig -3
     gtxns Amount
@@ -480,52 +489,52 @@ buy:
     *
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:83
+    // smart_contracts/digital_marketplace/contract.py:85
     // assert buyer_txn.close_remainder_to == pup.Global.zero_address
     frame_dig -3
     gtxns CloseRemainderTo
     global ZeroAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:84
+    // smart_contracts/digital_marketplace/contract.py:86
     // assert buyer_txn.rekey_to == pup.Global.zero_address
     frame_dig -3
     gtxns RekeyTo
     global ZeroAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:86-90
+    // smart_contracts/digital_marketplace/contract.py:88-92
     // pup.itxn.AssetTransfer(
     //     xfer_asset=self.asset_id.value,
     //     asset_receiver=pup.Txn.sender,
     //     asset_amount=decoded_quantity,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:88
+    // smart_contracts/digital_marketplace/contract.py:90
     // asset_receiver=pup.Txn.sender,
     txn Sender
-    // smart_contracts/digital_marketplace/contract.py:87
+    // smart_contracts/digital_marketplace/contract.py:89
     // xfer_asset=self.asset_id.value,
     int 0
     byte "asset_id"
     app_global_get_ex
     assert // check value exists
     itxn_field XferAsset
-    // smart_contracts/digital_marketplace/contract.py:86
+    // smart_contracts/digital_marketplace/contract.py:88
     // pup.itxn.AssetTransfer(
     int axfer
     itxn_field TypeEnum
     itxn_field AssetReceiver
     dup
     itxn_field AssetAmount
-    // smart_contracts/digital_marketplace/contract.py:86-90
+    // smart_contracts/digital_marketplace/contract.py:88-92
     // pup.itxn.AssetTransfer(
     //     xfer_asset=self.asset_id.value,
     //     asset_receiver=pup.Txn.sender,
     //     asset_amount=decoded_quantity,
     // ).submit()
     itxn_submit
-    // smart_contracts/digital_marketplace/contract.py:92
+    // smart_contracts/digital_marketplace/contract.py:94
     // self.deposited.value -= decoded_quantity
     int 0
     byte "deposited"

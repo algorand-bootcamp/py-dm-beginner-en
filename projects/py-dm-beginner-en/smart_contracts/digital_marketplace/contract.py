@@ -76,6 +76,8 @@ class DigitalMarketplace(arc4.ARC4Contract):
         quantity: arc4.UInt64,
         asset_to_buy: pup.Asset,
     ) -> None:
+        assert self.unitary_price.value != pup.UInt64(0)
+
         decoded_quantity = quantity.decode()
         assert buyer_txn.sender == pup.Txn.sender
         assert buyer_txn.receiver == pup.Global.current_application_address
