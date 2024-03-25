@@ -17,9 +17,8 @@
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
   "[python]": {
     "editor.codeActionsOnSave": {
-      "source.fixAll": true,
-      // Prevent default import sorting from running; Ruff will sort imports for us anyway
-      "source.organizeImports": false
+      "source.fixAll": "explicit",
+      "source.organizeImports": "never"
     },
     "editor.defaultFormatter": "ms-python.black-formatter",
     },

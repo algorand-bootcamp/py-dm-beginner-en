@@ -62,11 +62,11 @@ def digital_marketplace_client(
         indexer_client=indexer_client,
     )
 
-    client.create_create_application(asset_to_sell=test_asset_id)
+    client.create_create_application(asset_to_sell=test_asset_id, unitary_price=0)
     return client
 
 
-def test_prepare_deposit(
+def test_opt_in_to_asset(
     digital_marketplace_client: DigitalMarketplaceClient,
     creator: algokit_utils.Account,
     test_asset_id: int,
@@ -83,7 +83,7 @@ def test_prepare_deposit(
     sp_call.flat_fee = True
     sp_call.fee = 2_000
 
-    result = digital_marketplace_client.prepare_deposit(
+    result = digital_marketplace_client.opt_in_to_asset(
         mbr_pay=TransactionWithSigner(
             PaymentTxn(
                 sender=creator.address,
@@ -114,20 +114,20 @@ def test_deposit(
     creator: algokit_utils.Account,
     test_asset_id: int,
 ):
-    result = digital_marketplace_client.deposit(
-        xfer=TransactionWithSigner(
+    result = wait_for_confirmation(
+        digital_marketplace_client.algod_client,
+        digital_marketplace_client.algod_client.send_transaction(
             AssetTransferTxn(
                 index=test_asset_id,
                 sender=creator.address,
                 receiver=digital_marketplace_client.app_address,
                 amt=3,
                 sp=digital_marketplace_client.algod_client.suggested_params(),
-            ),
-            creator.signer,
-        )
+            ).sign(creator.private_key),
+        ),
     )
 
-    assert result.confirmed_round
+    assert result
 
     assert (
         digital_marketplace_client.algod_client.account_asset_info(
