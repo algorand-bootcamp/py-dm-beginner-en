@@ -21,27 +21,26 @@ from smart_contracts.artifacts.digital_marketplace.client import (
 
 
 @pytest.fixture(scope="session")
-def test_asset_id(algod_client: AlgodClient) -> int:
-    account = get_localnet_default_account(algod_client)
+def creator(algod_client: AlgodClient) -> algokit_utils.Account:
+    return get_localnet_default_account(algod_client)
+
+
+@pytest.fixture(scope="session")
+def test_asset_id(creator: algokit_utils.Account, algod_client: AlgodClient) -> int:
     sent_txn = wait_for_confirmation(
         algod_client,
         algod_client.send_transaction(
             AssetCreateTxn(
-                sender=account.address,
+                sender=creator.address,
                 sp=algod_client.suggested_params(),
                 total=10,
                 decimals=0,
                 default_frozen=False,
-            ).sign(account.private_key)
+            ).sign(creator.private_key)
         ),
     )
 
     return sent_txn["asset-index"]
-
-
-@pytest.fixture(scope="session")
-def creator(algod_client: AlgodClient) -> algokit_utils.Account:
-    return get_localnet_default_account(algod_client)
 
 
 @pytest.fixture(scope="session")
@@ -185,6 +184,13 @@ def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id
     )
 
     assert result.confirmed_round
+
+    assert (
+        digital_marketplace_client.algod_client.account_asset_info(
+            test_account.address, test_asset_id
+        )["asset-holding"]["amount"]
+        == 2
+    )
 
 
 def test_withdraw(
