@@ -50,7 +50,7 @@
     {
       "file": "smart_contracts/__main__.py",
       "description": "Uncomment the following lines to enable complementary utilities that will generate artifacts required for the [AlgoKit AVM Debugger](https://github.com/algorandfoundation/algokit-avm-vscode-debugger) VSCode plugin available on the [VSCode Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=algorandfoundation.algokit-avm-vscode-debugger). A new folder will be automatically created in the `.algokit` directory with source maps of all TEAL contracts in this workspace, as well as traces that will appear in a folder at the root of the workspace. You can then use the traces as entry points to trigger the debug extension. Make sure to have the `.algokit.toml` file available at the root of the workspace.",
-      "line": 13
+      "line": 15
     }
   ]
 }

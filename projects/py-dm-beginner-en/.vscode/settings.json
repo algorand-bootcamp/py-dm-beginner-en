@@ -18,6 +18,7 @@
   "[python]": {
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit",
+      // Prevent default import sorting from running; Ruff will sort imports for us anyway
       "source.organizeImports": "never"
     },
     "editor.defaultFormatter": "ms-python.black-formatter",

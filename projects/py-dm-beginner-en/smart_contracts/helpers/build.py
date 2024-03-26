@@ -3,6 +3,8 @@ import subprocess
 from pathlib import Path
 from shutil import rmtree
 
+from smart_contracts.helpers.util import find_app_spec_file
+
 logger = logging.getLogger(__name__)
 deployment_extension = "py"
 
@@ -30,12 +32,16 @@ def build(output_dir: Path, contract_path: Path) -> Path:
     if build_result.returncode:
         raise Exception(f"Could not build contract:\n{build_result.stdout}")
 
+    app_spec_file_name = find_app_spec_file(output_dir)
+    if app_spec_file_name is None:
+        raise Exception("Could not generate typed client, .arc32.json file not found")
+
     generate_result = subprocess.run(
         [
             "algokit",
             "generate",
             "client",
-            output_dir / "application.json",
+            output_dir / app_spec_file_name,
             "--output",
             output_dir / f"client.{deployment_extension}",
         ],
@@ -53,4 +59,4 @@ def build(output_dir: Path, contract_path: Path) -> Path:
             raise Exception(
                 f"Could not generate typed client:\n{generate_result.stdout}"
             )
-    return output_dir / "application.json"
+    return output_dir / app_spec_file_name
