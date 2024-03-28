@@ -33,10 +33,6 @@ class DigitalMarketplace(arc4.ARC4Contract):
     ) -> None:
         assert Txn.sender == Global.creator_address
         assert not Global.current_application_address.is_opted_in(Asset(self.asset_id))
-        # _balance, opted_into = op.AssetHoldingGet.asset_balance(
-        #     Global.current_application_address, self.asset_id.value
-        # )
-        # assert not opted_into
 
         assert mbr_pay.receiver == Global.current_application_address
         assert mbr_pay.amount == Global.min_balance + Global.asset_opt_in_min_balance
