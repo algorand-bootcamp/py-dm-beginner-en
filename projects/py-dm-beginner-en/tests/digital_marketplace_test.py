@@ -61,7 +61,7 @@ def digital_marketplace_client(
         indexer_client=indexer_client,
     )
 
-    client.create_create_application(asset_to_sell=test_asset_id, unitary_price=0)
+    client.create_create_application(unitary_price=0, asset_id=test_asset_id)
     return client
 
 
@@ -92,9 +92,9 @@ def test_opt_in_to_asset(
             ),
             creator.signer,
         ),
-        asset_to_sell=test_asset_id,
         transaction_parameters=algokit_utils.TransactionParameters(
             suggested_params=sp_call,
+            foreign_assets=[test_asset_id]
         ),
     )
 
@@ -175,11 +175,11 @@ def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id
             test_account.signer,
         ),
         quantity=2,
-        asset_to_buy=test_asset_id,
         transaction_parameters=algokit_utils.TransactionParameters(
             sender=test_account.address,
             signer=test_account.signer,
             suggested_params=sp_call,
+            foreign_assets=[test_asset_id]
         ),
     )
 
@@ -206,9 +206,9 @@ def test_delete_application(
     sp_call.flat_fee = True
     sp_call.fee = 3_000
     result = digital_marketplace_client.delete_delete_application(
-        asset_to_withdraw=test_asset_id,
         transaction_parameters=algokit_utils.TransactionParameters(
-            suggested_params=sp_call
+            suggested_params=sp_call,
+            foreign_assets=[test_asset_id]
         ),
     )
 

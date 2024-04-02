@@ -16,9 +16,9 @@ class DigitalMarketplace(arc4.ARC4Contract):
 
     @arc4.abimethod(allow_actions=["NoOp"], create="require")
     def create_application(
-        self, asset_to_sell: Asset, unitary_price: arc4.UInt64
+        self, asset_id: Asset, unitary_price: arc4.UInt64
     ) -> None:
-        self.asset_id = asset_to_sell.id
+        self.asset_id = asset_id.id
         self.unitary_price = unitary_price.native
 
     @arc4.abimethod
@@ -29,7 +29,7 @@ class DigitalMarketplace(arc4.ARC4Contract):
 
     @arc4.abimethod
     def opt_in_to_asset(
-        self, mbr_pay: gtxn.PaymentTransaction, asset_to_sell: Asset
+        self, mbr_pay: gtxn.PaymentTransaction
     ) -> None:
         assert Txn.sender == Global.creator_address
         assert not Global.current_application_address.is_opted_in(Asset(self.asset_id))
@@ -48,7 +48,6 @@ class DigitalMarketplace(arc4.ARC4Contract):
         self,
         buyer_txn: gtxn.PaymentTransaction,
         quantity: arc4.UInt64,
-        asset_to_buy: Asset,
     ) -> None:
         assert self.unitary_price != UInt64(0)
 
@@ -64,7 +63,7 @@ class DigitalMarketplace(arc4.ARC4Contract):
         ).submit()
 
     @arc4.abimethod(allow_actions=["DeleteApplication"])
-    def delete_application(self, asset_to_withdraw: Asset) -> None:
+    def delete_application(self) -> None:
         assert Txn.sender == Global.creator_address
 
         itxn.AssetTransfer(
