@@ -193,7 +193,7 @@ def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id
     )
 
 
-def test_withdraw(
+def test_delete_application(
     digital_marketplace_client: DigitalMarketplaceClient,
     creator: algokit_utils.Account,
     test_asset_id: int,
@@ -205,7 +205,7 @@ def test_withdraw(
     sp_call = digital_marketplace_client.algod_client.suggested_params()
     sp_call.flat_fee = True
     sp_call.fee = 3_000
-    result = digital_marketplace_client.delete_withdraw(
+    result = digital_marketplace_client.delete_delete_application(
         asset_to_withdraw=test_asset_id,
         transaction_parameters=algokit_utils.TransactionParameters(
             suggested_params=sp_call

@@ -64,7 +64,7 @@ class DigitalMarketplace(arc4.ARC4Contract):
         ).submit()
 
     @arc4.abimethod(allow_actions=["DeleteApplication"])
-    def withdraw(self, asset_to_withdraw: Asset) -> None:
+    def delete_application(self, asset_to_withdraw: Asset) -> None:
         assert Txn.sender == Global.creator_address
 
         itxn.AssetTransfer(

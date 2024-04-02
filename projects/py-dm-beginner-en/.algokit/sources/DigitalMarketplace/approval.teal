@@ -7,9 +7,9 @@ smart_contracts.digital_marketplace.contract.DigitalMarketplace.approval_program
     method "set_price(uint64)void"
     method "opt_in_to_asset(pay,asset)void"
     method "buy(pay,uint64,asset)void"
-    method "withdraw(asset)void"
+    method "delete_application(asset)void"
     txna ApplicationArgs 0
-    match main_create_application_route@1 main_set_price_route@2 main_opt_in_to_asset_route@3 main_buy_route@4 main_withdraw_route@5
+    match main_create_application_route@1 main_set_price_route@2 main_opt_in_to_asset_route@3 main_buy_route@4 main_delete_application_route@5
     err // reject transaction
 
 main_create_application_route@1:
@@ -105,7 +105,7 @@ main_buy_route@4:
     int 1
     return
 
-main_withdraw_route@5:
+main_delete_application_route@5:
     // smart_contracts/digital_marketplace/contract.py:66
     // @arc4.abimethod(allow_actions=["DeleteApplication"])
     txn OnCompletion
@@ -121,7 +121,7 @@ main_withdraw_route@5:
     txnas Assets
     // smart_contracts/digital_marketplace/contract.py:66
     // @arc4.abimethod(allow_actions=["DeleteApplication"])
-    callsub withdraw
+    callsub delete_application
     int 1
     return
 
@@ -330,11 +330,11 @@ buy:
     retsub
 
 
-// smart_contracts.digital_marketplace.contract.DigitalMarketplace.withdraw(asset_to_withdraw: uint64) -> void:
-withdraw:
+// smart_contracts.digital_marketplace.contract.DigitalMarketplace.delete_application(asset_to_withdraw: uint64) -> void:
+delete_application:
     // smart_contracts/digital_marketplace/contract.py:66-67
     // @arc4.abimethod(allow_actions=["DeleteApplication"])
-    // def withdraw(self, asset_to_withdraw: Asset) -> None:
+    // def delete_application(self, asset_to_withdraw: Asset) -> None:
     proto 1 0
     // smart_contracts/digital_marketplace/contract.py:68
     // assert Txn.sender == Global.creator_address
