@@ -15,22 +15,18 @@ class DigitalMarketplace(arc4.ARC4Contract):
     unitary_price: UInt64
 
     @arc4.abimethod(allow_actions=["NoOp"], create="require")
-    def create_application(
-        self, asset_id: Asset, unitary_price: arc4.UInt64
-    ) -> None:
+    def create_application(self, asset_id: Asset, unitary_price: UInt64) -> None:
         self.asset_id = asset_id.id
-        self.unitary_price = unitary_price.native
+        self.unitary_price = unitary_price
 
     @arc4.abimethod
-    def set_price(self, unitary_price: arc4.UInt64) -> None:
+    def set_price(self, unitary_price: UInt64) -> None:
         assert Txn.sender == Global.creator_address
 
-        self.unitary_price = unitary_price.native
+        self.unitary_price = unitary_price
 
     @arc4.abimethod
-    def opt_in_to_asset(
-        self, mbr_pay: gtxn.PaymentTransaction
-    ) -> None:
+    def opt_in_to_asset(self, mbr_pay: gtxn.PaymentTransaction) -> None:
         assert Txn.sender == Global.creator_address
         assert not Global.current_application_address.is_opted_in(Asset(self.asset_id))
 
@@ -47,11 +43,11 @@ class DigitalMarketplace(arc4.ARC4Contract):
     def buy(
         self,
         buyer_txn: gtxn.PaymentTransaction,
-        quantity: arc4.UInt64,
+        quantity: UInt64,
     ) -> None:
         assert self.unitary_price != UInt64(0)
 
-        decoded_quantity = quantity.native
+        decoded_quantity = quantity
         assert buyer_txn.sender == Txn.sender
         assert buyer_txn.receiver == Global.current_application_address
         assert buyer_txn.amount == self.unitary_price * decoded_quantity
