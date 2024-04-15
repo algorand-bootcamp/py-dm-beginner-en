@@ -1,19 +1,17 @@
-from copy import deepcopy
-
 import algokit_utils
 import algosdk.error
 import pytest
-from algokit_utils import get_localnet_default_account
+from algokit_utils import Account
+from algokit_utils.beta.account_manager import AddressAndSigner
+from algokit_utils.beta.algorand_client import (
+    AlgorandClient,
+    AssetCreateParams,
+    AssetOptInParams,
+    AssetTransferParams,
+    PayParams,
+)
 from algokit_utils.config import config
 from algosdk.atomic_transaction_composer import TransactionWithSigner
-from algosdk.transaction import (
-    AssetCreateTxn,
-    AssetTransferTxn,
-    PaymentTxn,
-    wait_for_confirmation,
-)
-from algosdk.v2client.algod import AlgodClient
-from algosdk.v2client.indexer import IndexerClient
 
 from smart_contracts.artifacts.digital_marketplace.client import (
     DigitalMarketplaceClient,
@@ -21,34 +19,41 @@ from smart_contracts.artifacts.digital_marketplace.client import (
 
 
 @pytest.fixture(scope="session")
-def creator(algod_client: AlgodClient) -> algokit_utils.Account:
-    return get_localnet_default_account(algod_client)
-
+def algorand() -> AlgorandClient:
+    client: AlgorandClient = AlgorandClient.default_local_net()
+    return client
 
 @pytest.fixture(scope="session")
-def test_asset_id(creator: algokit_utils.Account, algod_client: AlgodClient) -> int:
-    sent_txn = wait_for_confirmation(
-        algod_client,
-        algod_client.send_transaction(
-            AssetCreateTxn(
-                sender=creator.address,
-                sp=algod_client.suggested_params(),
-                total=10,
-                decimals=0,
-                default_frozen=False,
-            ).sign(creator.private_key)
-        ),
+def dispenser(algorand: AlgorandClient) -> AddressAndSigner:
+    return algorand.account.dispenser()
+
+@pytest.fixture(scope="session")
+def creator(algorand: AlgorandClient, dispenser: AddressAndSigner) -> AddressAndSigner:
+    acct = algorand.account.random()
+    algorand.send.payment(PayParams(
+        sender=dispenser.address,
+        receiver=acct.address,
+        amount=10_000_000
+    ))
+    return acct
+
+@pytest.fixture(scope="session")
+def test_asset_id(creator: Account, algorand: AlgorandClient) -> int:
+    sent_txn = algorand.send.asset_create(
+        AssetCreateParams(
+            sender=creator.address,
+            total=10
+        )
     )
 
-    return sent_txn["asset-index"]
+    return sent_txn["confirmation"]["asset-index"]
 
 
 @pytest.fixture(scope="session")
 def digital_marketplace_client(
     test_asset_id: int,
-    creator: algokit_utils.Account,
-    algod_client: AlgodClient,
-    indexer_client: IndexerClient,
+    creator: Account,
+    algorand: AlgorandClient,
 ) -> DigitalMarketplaceClient:
     config.configure(
         debug=True,
@@ -56,9 +61,9 @@ def digital_marketplace_client(
     )
 
     client = DigitalMarketplaceClient(
-        algod_client,
-        creator=creator,
-        indexer_client=indexer_client,
+        algod_client=algorand.client.algod,
+        sender=creator.address,
+        signer=creator.signer
     )
 
     client.create_create_application(unitary_price=0, asset_id=test_asset_id)
@@ -67,33 +72,31 @@ def digital_marketplace_client(
 
 def test_opt_in_to_asset(
     digital_marketplace_client: DigitalMarketplaceClient,
-    creator: algokit_utils.Account,
+    creator: Account,
     test_asset_id: int,
+    algorand: AlgorandClient
 ) -> None:
     pytest.raises(
         algosdk.error.AlgodHTTPError,
-        lambda: digital_marketplace_client.algod_client.account_asset_info(
+        lambda: algorand.account.get_asset_information(
             digital_marketplace_client.app_address, test_asset_id
         ),
     )
 
-    sp_pay = digital_marketplace_client.algod_client.suggested_params()
-    sp_call = deepcopy(sp_pay)
-    sp_call.flat_fee = True
-    sp_call.fee = 2_000
+
+    mbr_pay_txn =  algorand.transactions.payment(PayParams(
+        sender=creator.address,
+        receiver=digital_marketplace_client.app_address,
+        amount=200_000,
+        extra_fee=1_000
+    ))
 
     result = digital_marketplace_client.opt_in_to_asset(
         mbr_pay=TransactionWithSigner(
-            PaymentTxn(
-                sender=creator.address,
-                sp=sp_pay,
-                receiver=digital_marketplace_client.app_address,
-                amt=200_000,
-            ),
-            creator.signer,
+            txn=mbr_pay_txn,
+            signer=creator.signer
         ),
         transaction_parameters=algokit_utils.TransactionParameters(
-            suggested_params=sp_call,
             foreign_assets=[test_asset_id]
         ),
     )
@@ -101,7 +104,7 @@ def test_opt_in_to_asset(
     assert result.confirmed_round
 
     assert (
-        digital_marketplace_client.algod_client.account_asset_info(
+        algorand.account.get_asset_information(
             digital_marketplace_client.app_address, test_asset_id
         )["asset-holding"]["amount"]
         == 0
@@ -110,26 +113,21 @@ def test_opt_in_to_asset(
 
 def test_deposit(
     digital_marketplace_client: DigitalMarketplaceClient,
-    creator: algokit_utils.Account,
+    creator: Account,
     test_asset_id: int,
+    algorand: AlgorandClient
 ):
-    result = wait_for_confirmation(
-        digital_marketplace_client.algod_client,
-        digital_marketplace_client.algod_client.send_transaction(
-            AssetTransferTxn(
-                index=test_asset_id,
-                sender=creator.address,
-                receiver=digital_marketplace_client.app_address,
-                amt=3,
-                sp=digital_marketplace_client.algod_client.suggested_params(),
-            ).sign(creator.private_key),
-        ),
-    )
+    result = algorand.send.asset_transfer(AssetTransferParams(
+        sender=creator.address,
+        asset_id=test_asset_id,
+        receiver=digital_marketplace_client.app_address,
+        amount=3
+    ))
 
     assert result
 
     assert (
-        digital_marketplace_client.algod_client.account_asset_info(
+        algorand.account.get_asset_information(
             digital_marketplace_client.app_address, test_asset_id
         )["asset-holding"]["amount"]
         == 3
@@ -142,43 +140,36 @@ def test_set_price(digital_marketplace_client: DigitalMarketplaceClient):
     assert result.confirmed_round
 
 
-def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id: int):
-    test_account = algokit_utils.get_account(
-        digital_marketplace_client.algod_client, "test_account", 100
-    )
+def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id: int, algorand: AlgorandClient, dispenser: AddressAndSigner):
+    buyer = algorand.account.random()
 
-    wait_for_confirmation(
-        digital_marketplace_client.algod_client,
-        digital_marketplace_client.algod_client.send_transaction(
-            AssetTransferTxn(
-                index=test_asset_id,
-                sender=test_account.address,
-                receiver=test_account.address,
-                amt=0,
-                sp=digital_marketplace_client.algod_client.suggested_params(),
-            ).sign(test_account.signer.private_key)
-        ),
-    )
+    algorand.send.payment(PayParams(
+        sender=dispenser.address,
+        receiver=buyer.address,
+        amount=10_000_000
+    ))
 
-    sp_pay = digital_marketplace_client.algod_client.suggested_params()
-    sp_call = deepcopy(sp_pay)
-    sp_call.flat_fee = True
-    sp_call.fee = 2_000
+    algorand.send.asset_opt_in(AssetOptInParams(
+        asset_id=test_asset_id,
+        sender=buyer.address,
+    ))
+
+    buyer_payment_txn = algorand.transactions.payment(PayParams(
+        sender=buyer.address,
+        receiver=digital_marketplace_client.app_address,
+        amount=6_600_000,
+        extra_fee=1_000
+    ))
+
     result = digital_marketplace_client.buy(
         buyer_txn=TransactionWithSigner(
-            PaymentTxn(
-                sender=test_account.address,
-                receiver=digital_marketplace_client.app_address,
-                amt=6_600_000,
-                sp=digital_marketplace_client.algod_client.suggested_params(),
-            ),
-            test_account.signer,
+            txn=buyer_payment_txn,
+            signer=buyer.signer,
         ),
         quantity=2,
         transaction_parameters=algokit_utils.TransactionParameters(
-            sender=test_account.address,
-            signer=test_account.signer,
-            suggested_params=sp_call,
+            sender=buyer.address,
+            signer=buyer.signer,
             foreign_assets=[test_asset_id]
         ),
     )
@@ -186,8 +177,8 @@ def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id
     assert result.confirmed_round
 
     assert (
-        digital_marketplace_client.algod_client.account_asset_info(
-            test_account.address, test_asset_id
+        algorand.account.get_asset_information(
+            buyer.address, test_asset_id
         )["asset-holding"]["amount"]
         == 2
     )
@@ -195,10 +186,11 @@ def test_buy(digital_marketplace_client: DigitalMarketplaceClient, test_asset_id
 
 def test_delete_application(
     digital_marketplace_client: DigitalMarketplaceClient,
-    creator: algokit_utils.Account,
+    creator: Account,
     test_asset_id: int,
+    algorand: AlgorandClient
 ):
-    before_call_amount = digital_marketplace_client.algod_client.account_info(
+    before_call_amount = algorand.account.get_information(
         creator.address
     )["amount"]
 
@@ -214,13 +206,13 @@ def test_delete_application(
 
     assert result.confirmed_round
 
-    after_call_amount = digital_marketplace_client.algod_client.account_info(
+    after_call_amount = algorand.account.get_information(
         creator.address
     )["amount"]
 
     assert after_call_amount - before_call_amount == 6_600_000 + 200_000 - 3_000
     assert (
-        digital_marketplace_client.algod_client.account_asset_info(
+        algorand.account.get_asset_information(
             creator.address, test_asset_id
         )["asset-holding"]["amount"]
         == 8
