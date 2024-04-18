@@ -1,0 +1,11 @@
+[algokit]
+min_version = "v2.0.0"
+
+[project]
+type = "frontend"
+name = "frontend"
+artifacts = "src/contracts"
+
+[project.run]
+build = { commands = ['npm run build'], description = 'Build frontend' }
+test = { commands = ['npm run test'], description = 'Run frontend tests' }
