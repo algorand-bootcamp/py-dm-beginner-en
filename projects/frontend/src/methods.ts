@@ -34,7 +34,7 @@ export function create(
       extraFee: algokit.algos(0.001),
     })
 
-    await dmClient.optInToAsset({ mbrTxn })
+    await dmClient.optInToAsset({ mbrPay: mbrTxn })
 
     await algorand.send.assetTransfer({
       assetId,
