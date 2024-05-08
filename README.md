@@ -1,21 +1,12 @@
-# py-dm-beginner-en
+# Beginner Python Bootcamp
 
-Welcome to your new AlgoKit project!
+Welcome to the Python Bootcamp - Beginner Level. 
 
-This is your workspace root. A `workspace` in AlgoKit is an orchestrated collection of standalone projects (backends, smart contracts, frontend apps and etc).
+In this content you will learn how to create your complete dapp using Algorand Python: Build the contract, test the contract, build the clients and create the frontend using React.
 
-By default, `projects_root_path` parameter is set to `projects`. Which instructs AlgoKit CLI to create a new directory under `projects` directory when new project is instantiated via `algokit init` at the root of the workspace.
+## Live Recordings
 
-## Getting Started
-
-To get started refer to `README.md` files in respective sub-projects in the `projects` directory.
-
-To learn more about algokit, visit [documentation](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/algokit.md).
-
-### GitHub Codespaces
-
-If executing this repository in GitHub Codespaces, the container will automatically cleanup templatized content and pre-install `algokit` for you. To get started execute:
-
-- `algokit init` - to invoke interactive wizard to guide you through the process of creating a new AlgoKit project
-
-Powered by [Copier templates](https://copier.readthedocs.io/en/stable/).
+- [Session 1: Building your Marketplace Smart Contract](https://drive.google.com/file/d/1j-DZC7nekqyid1zNYeZHgFCkA4wOfsg3/view?usp=drive_link)
+- [Session 2: Testing the Smart Contract](https://drive.google.com/file/d/1OnyzvkYPblf0s8tiJ_2pQJ7H9MEqR3IZ/view?usp=drive_link)
+- [Session 3: Build methods for the client](https://drive.google.com/file/d/1wsud5nsAagi8gTZWcOY_69Nm_qbsJxZt/view?usp=drive_link)
+- [Session 4: Frontend for our dapp](https://drive.google.com/file/d/14ji7J8ei1SQcjkBVbZ9JUdG-eyGtb4NP/view?usp=drive_link)
