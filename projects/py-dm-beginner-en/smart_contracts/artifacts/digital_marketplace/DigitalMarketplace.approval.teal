@@ -1,7 +1,8 @@
 #pragma version 10
 
 smart_contracts.digital_marketplace.contract.DigitalMarketplace.approval_program:
-    // smart_contracts/digital_marketplace/contract.py:13
+    // smart_contracts/digital_marketplace/contract.py:20-21
+    // # We want the methods in our contract to follow the ARC4 standard
     // class DigitalMarketplace(arc4.ARC4Contract):
     method "create_application(asset,uint64)void"
     method "set_price(uint64)void"
@@ -13,54 +14,75 @@ smart_contracts.digital_marketplace.contract.DigitalMarketplace.approval_program
     err // reject transaction
 
 main_create_application_route@1:
-    // smart_contracts/digital_marketplace/contract.py:17
-    // @arc4.abimethod(allow_actions=["NoOp"], create="require")
+    // smart_contracts/digital_marketplace/contract.py:29-37
+    // # We want create_application to be a plublic ABI method
+    // @arc4.abimethod(
+    //     # There are certain actions that a contract call can do
+    //     # Some examples are UpdateApplication, DeleteApplication, and NoOp
+    //     # NoOp is a call that does nothing special after it is exected
+    //     allow_actions=["NoOp"],
+    //     # Require that this method is only callable when creating the app
+    //     create="require",
+    // )
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     !
     assert // is creating
-    // smart_contracts/digital_marketplace/contract.py:13
+    // smart_contracts/digital_marketplace/contract.py:20-21
+    // # We want the methods in our contract to follow the ARC4 standard
     // class DigitalMarketplace(arc4.ARC4Contract):
     txna ApplicationArgs 1
     btoi
     txnas Assets
     txna ApplicationArgs 2
     btoi
-    // smart_contracts/digital_marketplace/contract.py:17
-    // @arc4.abimethod(allow_actions=["NoOp"], create="require")
+    // smart_contracts/digital_marketplace/contract.py:29-37
+    // # We want create_application to be a plublic ABI method
+    // @arc4.abimethod(
+    //     # There are certain actions that a contract call can do
+    //     # Some examples are UpdateApplication, DeleteApplication, and NoOp
+    //     # NoOp is a call that does nothing special after it is exected
+    //     allow_actions=["NoOp"],
+    //     # Require that this method is only callable when creating the app
+    //     create="require",
+    // )
     callsub create_application
     int 1
     return
 
 main_set_price_route@2:
-    // smart_contracts/digital_marketplace/contract.py:22
+    // smart_contracts/digital_marketplace/contract.py:49
     // @arc4.abimethod
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
-    // smart_contracts/digital_marketplace/contract.py:13
+    // smart_contracts/digital_marketplace/contract.py:20-21
+    // # We want the methods in our contract to follow the ARC4 standard
     // class DigitalMarketplace(arc4.ARC4Contract):
     txna ApplicationArgs 1
     btoi
-    // smart_contracts/digital_marketplace/contract.py:22
+    // smart_contracts/digital_marketplace/contract.py:49
     // @arc4.abimethod
     callsub set_price
     int 1
     return
 
 main_opt_in_to_asset_route@3:
-    // smart_contracts/digital_marketplace/contract.py:28
+    // smart_contracts/digital_marketplace/contract.py:59-61
+    // # Before any account can receive an asset, it must opt-in to it
+    // # This method enables the application to opt-in to the asset
     // @arc4.abimethod
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
-    // smart_contracts/digital_marketplace/contract.py:13
+    // smart_contracts/digital_marketplace/contract.py:20-21
+    // # We want the methods in our contract to follow the ARC4 standard
     // class DigitalMarketplace(arc4.ARC4Contract):
     txn GroupIndex
     int 1
@@ -70,21 +92,24 @@ main_opt_in_to_asset_route@3:
     int pay
     ==
     assert // transaction type is pay
-    // smart_contracts/digital_marketplace/contract.py:28
+    // smart_contracts/digital_marketplace/contract.py:59-61
+    // # Before any account can receive an asset, it must opt-in to it
+    // # This method enables the application to opt-in to the asset
     // @arc4.abimethod
     callsub opt_in_to_asset
     int 1
     return
 
 main_buy_route@4:
-    // smart_contracts/digital_marketplace/contract.py:42
+    // smart_contracts/digital_marketplace/contract.py:94
     // @arc4.abimethod
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
-    // smart_contracts/digital_marketplace/contract.py:13
+    // smart_contracts/digital_marketplace/contract.py:20-21
+    // # We want the methods in our contract to follow the ARC4 standard
     // class DigitalMarketplace(arc4.ARC4Contract):
     txn GroupIndex
     int 1
@@ -96,15 +121,18 @@ main_buy_route@4:
     assert // transaction type is pay
     txna ApplicationArgs 1
     btoi
-    // smart_contracts/digital_marketplace/contract.py:42
+    // smart_contracts/digital_marketplace/contract.py:94
     // @arc4.abimethod
     callsub buy
     int 1
     return
 
 main_delete_application_route@5:
-    // smart_contracts/digital_marketplace/contract.py:61
-    // @arc4.abimethod(allow_actions=["DeleteApplication"])
+    // smart_contracts/digital_marketplace/contract.py:115-118
+    // @arc4.abimethod(
+    //     # This method is called when the application is deleted
+    //     allow_actions=["DeleteApplication"]
+    // )
     txn OnCompletion
     int DeleteApplication
     ==
@@ -118,16 +146,31 @@ main_delete_application_route@5:
 
 // smart_contracts.digital_marketplace.contract.DigitalMarketplace.create_application(asset_id: uint64, unitary_price: uint64) -> void:
 create_application:
-    // smart_contracts/digital_marketplace/contract.py:17-18
-    // @arc4.abimethod(allow_actions=["NoOp"], create="require")
-    // def create_application(self, asset_id: Asset, unitary_price: UInt64) -> None:
+    // smart_contracts/digital_marketplace/contract.py:29-44
+    // # We want create_application to be a plublic ABI method
+    // @arc4.abimethod(
+    //     # There are certain actions that a contract call can do
+    //     # Some examples are UpdateApplication, DeleteApplication, and NoOp
+    //     # NoOp is a call that does nothing special after it is exected
+    //     allow_actions=["NoOp"],
+    //     # Require that this method is only callable when creating the app
+    //     create="require",
+    // )
+    // def create_application(
+    //     self,
+    //     # The ID of the asset we're selling
+    //     asset_id: Asset,
+    //     # The initial sale price
+    //     unitary_price: UInt64,
+    // ) -> None:
     proto 2 0
-    // smart_contracts/digital_marketplace/contract.py:19
+    // smart_contracts/digital_marketplace/contract.py:45-46
+    // # Save the values we passed in to our method in the contract's state
     // self.asset_id = asset_id.id
     byte "asset_id"
     frame_dig -2
     app_global_put
-    // smart_contracts/digital_marketplace/contract.py:20
+    // smart_contracts/digital_marketplace/contract.py:47
     // self.unitary_price = unitary_price
     byte "unitary_price"
     frame_dig -1
@@ -137,17 +180,21 @@ create_application:
 
 // smart_contracts.digital_marketplace.contract.DigitalMarketplace.set_price(unitary_price: uint64) -> void:
 set_price:
-    // smart_contracts/digital_marketplace/contract.py:22-23
+    // smart_contracts/digital_marketplace/contract.py:49-50
     // @arc4.abimethod
     // def set_price(self, unitary_price: UInt64) -> None:
     proto 1 0
-    // smart_contracts/digital_marketplace/contract.py:24
+    // smart_contracts/digital_marketplace/contract.py:51-54
+    // # We don't want anyone to be able to come in and modify the price
+    // # You could implement some sort of RBAC,
+    // # but in this case just making sure the caller is the app creator works
     // assert Txn.sender == Global.creator_address
     txn Sender
     global CreatorAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:26
+    // smart_contracts/digital_marketplace/contract.py:56-57
+    // # Save the new price
     // self.unitary_price = unitary_price
     byte "unitary_price"
     frame_dig -1
@@ -157,17 +204,19 @@ set_price:
 
 // smart_contracts.digital_marketplace.contract.DigitalMarketplace.opt_in_to_asset(mbr_pay: uint64) -> void:
 opt_in_to_asset:
-    // smart_contracts/digital_marketplace/contract.py:28-29
+    // smart_contracts/digital_marketplace/contract.py:59-67
+    // # Before any account can receive an asset, it must opt-in to it
+    // # This method enables the application to opt-in to the asset
     // @arc4.abimethod
-    // def opt_in_to_asset(self, mbr_pay: gtxn.PaymentTransaction) -> None:
+    // def opt_in_to_asset(
+    //     self,
+    //     # Whenever someone calls this method, they also need to send a payment
+    //     # A payment transaction is a transfer of ALGO
+    //     mbr_pay: gtxn.PaymentTransaction,
+    // ) -> None:
     proto 1 0
-    // smart_contracts/digital_marketplace/contract.py:30
-    // assert Txn.sender == Global.creator_address
-    txn Sender
-    global CreatorAddress
-    ==
-    assert
-    // smart_contracts/digital_marketplace/contract.py:31
+    // smart_contracts/digital_marketplace/contract.py:68-69
+    // # We want to make sure that the application address is not already opted in
     // assert not Global.current_application_address.is_opted_in(Asset(self.asset_id))
     global CurrentApplicationAddress
     int 0
@@ -178,14 +227,20 @@ opt_in_to_asset:
     bury 1
     !
     assert
-    // smart_contracts/digital_marketplace/contract.py:33
+    // smart_contracts/digital_marketplace/contract.py:74-76
+    // # Just because we made it an argument to the method, there's no gurantee
+    // # it is being sent to the aplication's address so we need to manually assert
     // assert mbr_pay.receiver == Global.current_application_address
     frame_dig -1
     gtxns Receiver
     global CurrentApplicationAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:34
+    // smart_contracts/digital_marketplace/contract.py:78-82
+    // # On Algorand, each account has a minimum balance requirement (MBR)
+    // # The MBR is locked in the account and cannot be spent (until explicitly unlocked)
+    // # Every accounts has an MBR of 0.1 ALGO (Global.min_balance)
+    // # Opting into an asset increases the MBR by 0.1 ALGO (Global.asset_opt_in_min_balance)
     // assert mbr_pay.amount == Global.min_balance + Global.asset_opt_in_min_balance
     frame_dig -1
     gtxns Amount
@@ -194,33 +249,45 @@ opt_in_to_asset:
     +
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:36-40
+    // smart_contracts/digital_marketplace/contract.py:84-92
+    // # Transactions can be sent from a user via signatures
+    // # They can also be sent programmatically from a smart contract
+    // # Here we want to issue an opt-in transaction
+    // # An opt-in transaction is simply transferring 0 of an asset to yourself
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Global.current_application_address,
     //     asset_amount=0,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:37
+    // smart_contracts/digital_marketplace/contract.py:89
     // xfer_asset=self.asset_id,
     int 0
     byte "asset_id"
     app_global_get_ex
     assert // check asset_id exists
-    // smart_contracts/digital_marketplace/contract.py:38
+    // smart_contracts/digital_marketplace/contract.py:90
     // asset_receiver=Global.current_application_address,
     global CurrentApplicationAddress
-    // smart_contracts/digital_marketplace/contract.py:39
+    // smart_contracts/digital_marketplace/contract.py:91
     // asset_amount=0,
     int 0
     itxn_field AssetAmount
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // smart_contracts/digital_marketplace/contract.py:36
+    // smart_contracts/digital_marketplace/contract.py:84-88
+    // # Transactions can be sent from a user via signatures
+    // # They can also be sent programmatically from a smart contract
+    // # Here we want to issue an opt-in transaction
+    // # An opt-in transaction is simply transferring 0 of an asset to yourself
     // itxn.AssetTransfer(
     int axfer
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:36-40
+    // smart_contracts/digital_marketplace/contract.py:84-92
+    // # Transactions can be sent from a user via signatures
+    // # They can also be sent programmatically from a smart contract
+    // # Here we want to issue an opt-in transaction
+    // # An opt-in transaction is simply transferring 0 of an asset to yourself
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Global.current_application_address,
@@ -232,37 +299,34 @@ opt_in_to_asset:
 
 // smart_contracts.digital_marketplace.contract.DigitalMarketplace.buy(buyer_txn: uint64, quantity: uint64) -> void:
 buy:
-    // smart_contracts/digital_marketplace/contract.py:42-47
+    // smart_contracts/digital_marketplace/contract.py:94-101
     // @arc4.abimethod
     // def buy(
     //     self,
+    //     # To buy assets, a payment must be sent
     //     buyer_txn: gtxn.PaymentTransaction,
+    //     # The quantity of assets to buy
     //     quantity: UInt64,
     // ) -> None:
     proto 2 0
-    // smart_contracts/digital_marketplace/contract.py:48
-    // assert self.unitary_price != UInt64(0)
-    int 0
-    byte "unitary_price"
-    app_global_get_ex
-    assert // check unitary_price exists
-    assert
-    // smart_contracts/digital_marketplace/contract.py:51
+    // smart_contracts/digital_marketplace/contract.py:102-104
+    // # We need to verify that the payment is being sent to the application
+    // # and is enough to cover the cost of the asset
     // assert buyer_txn.sender == Txn.sender
     frame_dig -2
     gtxns Sender
     txn Sender
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:52
+    // smart_contracts/digital_marketplace/contract.py:105
     // assert buyer_txn.receiver == Global.current_application_address
     frame_dig -2
     gtxns Receiver
     global CurrentApplicationAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:53
-    // assert buyer_txn.amount == self.unitary_price * decoded_quantity
+    // smart_contracts/digital_marketplace/contract.py:106
+    // assert buyer_txn.amount == self.unitary_price * quantity
     frame_dig -2
     gtxns Amount
     int 0
@@ -273,35 +337,38 @@ buy:
     *
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:55-59
+    // smart_contracts/digital_marketplace/contract.py:108-113
+    // # Once we've verified the payment, we can transfer the asset
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Txn.sender,
-    //     asset_amount=decoded_quantity,
+    //     asset_amount=quantity,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:56
+    // smart_contracts/digital_marketplace/contract.py:110
     // xfer_asset=self.asset_id,
     int 0
     byte "asset_id"
     app_global_get_ex
     assert // check asset_id exists
-    // smart_contracts/digital_marketplace/contract.py:57
+    // smart_contracts/digital_marketplace/contract.py:111
     // asset_receiver=Txn.sender,
     txn Sender
     frame_dig -1
     itxn_field AssetAmount
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // smart_contracts/digital_marketplace/contract.py:55
+    // smart_contracts/digital_marketplace/contract.py:108-109
+    // # Once we've verified the payment, we can transfer the asset
     // itxn.AssetTransfer(
     int axfer
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:55-59
+    // smart_contracts/digital_marketplace/contract.py:108-113
+    // # Once we've verified the payment, we can transfer the asset
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Txn.sender,
-    //     asset_amount=decoded_quantity,
+    //     asset_amount=quantity,
     // ).submit()
     itxn_submit
     retsub
@@ -309,82 +376,104 @@ buy:
 
 // smart_contracts.digital_marketplace.contract.DigitalMarketplace.delete_application() -> void:
 delete_application:
-    // smart_contracts/digital_marketplace/contract.py:61-62
-    // @arc4.abimethod(allow_actions=["DeleteApplication"])
+    // smart_contracts/digital_marketplace/contract.py:115-119
+    // @arc4.abimethod(
+    //     # This method is called when the application is deleted
+    //     allow_actions=["DeleteApplication"]
+    // )
     // def delete_application(self) -> None:
     proto 0 0
-    // smart_contracts/digital_marketplace/contract.py:63
+    // smart_contracts/digital_marketplace/contract.py:120-121
+    // # Only allow the creator to delete the application
     // assert Txn.sender == Global.creator_address
     txn Sender
     global CreatorAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:65-70
+    // smart_contracts/digital_marketplace/contract.py:123-132
+    // # Send all the unsold assets to the creator
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Global.creator_address,
+    //     # The amount is 0, but the asset_close_to field is set
+    //     # This means that ALL assets are being sent to the asset_close_to address
     //     asset_amount=0,
+    //     # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
     //     asset_close_to=Global.creator_address,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:66
+    // smart_contracts/digital_marketplace/contract.py:125
     // xfer_asset=self.asset_id,
     int 0
     byte "asset_id"
     app_global_get_ex
     assert // check asset_id exists
-    // smart_contracts/digital_marketplace/contract.py:67
+    // smart_contracts/digital_marketplace/contract.py:126
     // asset_receiver=Global.creator_address,
     global CreatorAddress
-    // smart_contracts/digital_marketplace/contract.py:69
+    // smart_contracts/digital_marketplace/contract.py:130-131
+    // # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
     // asset_close_to=Global.creator_address,
     dup
     itxn_field AssetCloseTo
-    // smart_contracts/digital_marketplace/contract.py:68
+    // smart_contracts/digital_marketplace/contract.py:127-129
+    // # The amount is 0, but the asset_close_to field is set
+    // # This means that ALL assets are being sent to the asset_close_to address
     // asset_amount=0,
     int 0
     itxn_field AssetAmount
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // smart_contracts/digital_marketplace/contract.py:65
+    // smart_contracts/digital_marketplace/contract.py:123-124
+    // # Send all the unsold assets to the creator
     // itxn.AssetTransfer(
     int axfer
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:65-70
+    // smart_contracts/digital_marketplace/contract.py:123-132
+    // # Send all the unsold assets to the creator
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
     //     asset_receiver=Global.creator_address,
+    //     # The amount is 0, but the asset_close_to field is set
+    //     # This means that ALL assets are being sent to the asset_close_to address
     //     asset_amount=0,
+    //     # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
     //     asset_close_to=Global.creator_address,
     // ).submit()
     itxn_submit
-    // smart_contracts/digital_marketplace/contract.py:72-76
+    // smart_contracts/digital_marketplace/contract.py:134-140
+    // # Send the remaining balance to the creator
     // itxn.Payment(
     //     receiver=Global.creator_address,
     //     amount=0,
+    //     # Close the account to get back ALL the ALGO in the account
     //     close_remainder_to=Global.creator_address,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:73
+    // smart_contracts/digital_marketplace/contract.py:136
     // receiver=Global.creator_address,
     global CreatorAddress
-    // smart_contracts/digital_marketplace/contract.py:75
+    // smart_contracts/digital_marketplace/contract.py:138-139
+    // # Close the account to get back ALL the ALGO in the account
     // close_remainder_to=Global.creator_address,
     dup
     itxn_field CloseRemainderTo
-    // smart_contracts/digital_marketplace/contract.py:74
+    // smart_contracts/digital_marketplace/contract.py:137
     // amount=0,
     int 0
     itxn_field Amount
     itxn_field Receiver
-    // smart_contracts/digital_marketplace/contract.py:72
+    // smart_contracts/digital_marketplace/contract.py:134-135
+    // # Send the remaining balance to the creator
     // itxn.Payment(
     int pay
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:72-76
+    // smart_contracts/digital_marketplace/contract.py:134-140
+    // # Send the remaining balance to the creator
     // itxn.Payment(
     //     receiver=Global.creator_address,
     //     amount=0,
+    //     # Close the account to get back ALL the ALGO in the account
     //     close_remainder_to=Global.creator_address,
     // ).submit()
     itxn_submit

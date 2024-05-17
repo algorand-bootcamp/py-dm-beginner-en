@@ -32,6 +32,7 @@ def dispenser(algorand: AlgorandClient) -> AddressAndSigner:
 def creator(algorand: AlgorandClient, dispenser: AddressAndSigner) -> AddressAndSigner:
     acct = algorand.account.random()
 
+    # Make sure the account has some ALGO
     algorand.send.payment(
         PayParams(sender=dispenser.address, receiver=acct.address, amount=10_000_000)
     )
@@ -41,10 +42,12 @@ def creator(algorand: AlgorandClient, dispenser: AddressAndSigner) -> AddressAnd
 
 @pytest.fixture(scope="session")
 def test_asset_id(creator: AddressAndSigner, algorand: AlgorandClient) -> int:
+    # Create an asset
     sent_txn = algorand.send.asset_create(
         AssetCreateParams(sender=creator.address, total=10)
     )
 
+    # Make sure the network tells us the ID of the asset we just created
     return sent_txn["confirmation"]["asset-index"]
 
 
@@ -59,6 +62,7 @@ def digital_marketplace_client(
         signer=creator.signer,
     )
 
+    # Create an instance of our application on the network
     client.create_create_application(unitary_price=0, asset_id=test_asset_id)
 
     return client
@@ -113,6 +117,7 @@ def test_deposit(
     test_asset_id: int,
     algorand: AlgorandClient,
 ):
+    # transfer 3 assets to the app
     result = algorand.send.asset_transfer(
         AssetTransferParams(
             sender=creator.address,
@@ -122,8 +127,10 @@ def test_deposit(
         )
     )
 
+    # make sure the transfer was successful
     assert result["confirmation"]
 
+    # make sure the app now has 3 assets
     assert (
         algorand.account.get_asset_information(
             digital_marketplace_client.app_address, test_asset_id
@@ -194,8 +201,8 @@ def test_delete_application(
     creator: AddressAndSigner,
     test_asset_id: int,
     algorand: AlgorandClient,
-    dispenser: AddressAndSigner,
 ):
+    # Get the balance of the creator before we delete so we can measure the effect of the deletion
     before_call_amount = algorand.account.get_information(creator.address)["amount"]
 
     result = digital_marketplace_client.delete_delete_application(
@@ -209,7 +216,12 @@ def test_delete_application(
 
     after_call_amount = algorand.account.get_information(creator.address)["amount"]
 
+    # Make sure the creator got all of the remaning assets and the remaining balance in the contract (minus fees)
+    # 2 * 3_300_000 for the ALGO we got from sales
+    # 200_000 for the MBR ALGO in the app that gets unlocked by opting out and closing the account
+    # -3_000 for the fees
     assert after_call_amount - before_call_amount == (2 * 3_300_000) + 200_000 - 3_000
+    # We sold two assets, so the creator should get 8 back
     assert (
         algorand.account.get_asset_information(creator.address, test_asset_id)[
             "asset-holding"
