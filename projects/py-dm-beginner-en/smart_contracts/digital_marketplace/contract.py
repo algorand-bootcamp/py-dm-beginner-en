@@ -46,16 +46,6 @@ class DigitalMarketplace(arc4.ARC4Contract):
         self.asset_id = asset_id.id
         self.unitary_price = unitary_price
 
-    @arc4.abimethod
-    def set_price(self, unitary_price: UInt64) -> None:
-        # We don't want anyone to be able to come in and modify the price
-        # You could implement some sort of RBAC,
-        # but in this case just making sure the caller is the app creator works
-        assert Txn.sender == Global.creator_address
-
-        # Save the new price
-        self.unitary_price = unitary_price
-
     # Before any account can receive an asset, it must opt-in to it
     # This method enables the application to opt-in to the asset
     @arc4.abimethod

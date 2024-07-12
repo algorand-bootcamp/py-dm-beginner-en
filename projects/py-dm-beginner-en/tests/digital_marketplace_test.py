@@ -137,11 +137,3 @@ def test_deposit(
         )["asset-holding"]["amount"]
         == 3
     )
-
-
-def test_set_price(digital_marketplace_client: DigitalMarketplaceClient):
-    result = digital_marketplace_client.set_price(unitary_price=3_300_000)
-
-    assert result.confirmed_round
-
-
