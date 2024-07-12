@@ -45,38 +45,3 @@ class DigitalMarketplace(arc4.ARC4Contract):
         # Save the values we passed in to our method in the contract's state
         self.asset_id = asset_id.id
         self.unitary_price = unitary_price
-
-    # Before any account can receive an asset, it must opt-in to it
-    # This method enables the application to opt-in to the asset
-    @arc4.abimethod
-    def opt_in_to_asset(
-        self,
-        # Whenever someone calls this method, they also need to send a payment
-        # A payment transaction is a transfer of ALGO
-        mbr_pay: gtxn.PaymentTransaction,
-    ) -> None:
-        # We want to make sure that the application address is not already opted in
-        assert not Global.current_application_address.is_opted_in(Asset(self.asset_id))
-
-        # Just like asserting fields in Txn, we can assert fields in the PaymentTxn
-        # We can do this only because it is grouped atomically with our app call
-
-        # Just because we made it an argument to the method, there's no gurantee
-        # it is being sent to the aplication's address so we need to manually assert
-        assert mbr_pay.receiver == Global.current_application_address
-
-        # On Algorand, each account has a minimum balance requirement (MBR)
-        # The MBR is locked in the account and cannot be spent (until explicitly unlocked)
-        # Every accounts has an MBR of 0.1 ALGO (Global.min_balance)
-        # Opting into an asset increases the MBR by 0.1 ALGO (Global.asset_opt_in_min_balance)
-        assert mbr_pay.amount == Global.min_balance + Global.asset_opt_in_min_balance
-
-        # Transactions can be sent from a user via signatures
-        # They can also be sent programmatically from a smart contract
-        # Here we want to issue an opt-in transaction
-        # An opt-in transaction is simply transferring 0 of an asset to yourself
-        itxn.AssetTransfer(
-            xfer_asset=self.asset_id,
-            asset_receiver=Global.current_application_address,
-            asset_amount=0,
-        ).submit()
