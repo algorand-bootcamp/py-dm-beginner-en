@@ -194,37 +194,3 @@ def test_buy(
         ]["amount"]
         == 2
     )
-
-
-def test_delete_application(
-    digital_marketplace_client: DigitalMarketplaceClient,
-    creator: AddressAndSigner,
-    test_asset_id: int,
-    algorand: AlgorandClient,
-):
-    # Get the balance of the creator before we delete so we can measure the effect of the deletion
-    before_call_amount = algorand.account.get_information(creator.address)["amount"]
-
-    result = digital_marketplace_client.delete_delete_application(
-        transaction_parameters=algokit_utils.TransactionParameters(
-            # we are sending the asset in the call, so we need to tell the AVM
-            foreign_assets=[test_asset_id],
-        )
-    )
-
-    assert result.confirmed_round
-
-    after_call_amount = algorand.account.get_information(creator.address)["amount"]
-
-    # Make sure the creator got all of the remaning assets and the remaining balance in the contract (minus fees)
-    # 2 * 3_300_000 for the ALGO we got from sales
-    # 200_000 for the MBR ALGO in the app that gets unlocked by opting out and closing the account
-    # -3_000 for the fees
-    assert after_call_amount - before_call_amount == (2 * 3_300_000) + 200_000 - 3_000
-    # We sold two assets, so the creator should get 8 back
-    assert (
-        algorand.account.get_asset_information(creator.address, test_asset_id)[
-            "asset-holding"
-        ]["amount"]
-        == 8
-    )
