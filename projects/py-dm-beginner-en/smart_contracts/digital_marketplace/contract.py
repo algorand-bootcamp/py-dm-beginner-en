@@ -127,7 +127,7 @@ class DigitalMarketplace(arc4.ARC4Contract):
             # The amount is 0, but the asset_close_to field is set
             # This means that ALL assets are being sent to the asset_close_to address
             asset_amount=0,
-            # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
+            # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset 
             asset_close_to=Global.creator_address,
         ).submit()
 
