@@ -1,8 +1,0 @@
-#pragma version 10
-
-smart_contracts.digital_marketplace.contract.DigitalMarketplace.clear_state_program:
-    // smart_contracts/digital_marketplace/contract.py:20-21
-    // # We want the methods in our contract to follow the ARC4 standard
-    // class DigitalMarketplace(arc4.ARC4Contract):
-    int 1
-    return

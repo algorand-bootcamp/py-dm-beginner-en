@@ -1,0 +1,14 @@
+name: Pull Request validation
+
+on: [pull_request]
+
+
+jobs:
+  py-dm-beginner-en-contracts-ci:
+    name: Run py-dm-beginner-en-contracts validation
+    uses: ./.github/workflows/py-dm-beginner-en-contracts-ci.yaml
+
+  py-dm-beginner-en-frontend-ci:
+    name: Run py-dm-beginner-en-frontend validation
+    uses: ./.github/workflows/py-dm-beginner-en-frontend-ci.yaml
+

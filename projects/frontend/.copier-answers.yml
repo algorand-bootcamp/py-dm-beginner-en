@@ -1,9 +1,0 @@
-# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 0.10.1
-_src_path: gh:algorandfoundation/algokit-react-frontend-template
-author_email: joepolny@gmail.com
-author_name: Joe Polny
-cloud_provider: none
-preset_name: production
-project_name: frontend
-

@@ -1,0 +1,10 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 1.2.4
+_src_path: gh:algorandfoundation/algokit-python-template
+author_email: marco@lazystar.de
+author_name: lazystar
+contract_name: digital_marketplace
+deployment_language: python
+preset_name: production
+project_name: py-dm-beginner-en-contracts
+

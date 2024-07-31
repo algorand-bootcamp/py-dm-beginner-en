@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+coverage/
 
 # Translations
 *.mo
@@ -123,6 +124,9 @@ celerybeat.pid
 .env
 .venv
 env/
+.env.*
+!.env.*.template
+!.env.template
 venv/
 ENV/
 env.bak/
@@ -156,8 +160,10 @@ dmypy.json
 cython_debug/
 
 # PyCharm
-.idea/
-!.idea/runConfigurations
+.idea
+!.idea/
+.idea/*
+!.idea/runConfigurations/
 
 # macOS
 .DS_Store
@@ -168,5 +174,7 @@ cython_debug/
 # NPM
 node_modules
 
-/tmp
-/projects/frontend
+# AlgoKit
+debug_traces/
+.algokit/static-analysis/tealer/
+.algokit/sources

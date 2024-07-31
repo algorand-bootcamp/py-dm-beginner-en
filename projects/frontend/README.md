@@ -1,45 +1,65 @@
-# frontend
+# py-dm-beginner-en-frontend
 
 This starter React project has been generated using AlgoKit. See below for default getting started instructions.
 
 # Setup
 
-### Initial setup
+### Initial Setup
 
-1. Clone this repository locally
-2. Install pre-requisites:
-   - Make sure to have [Docker](https://www.docker.com/) installed and running on your machine.
-   - Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install): The minimum required version is `1.1`. Ensure you can execute `algokit --version` and get `1.1` or later.
-   - Bootstrap your local environment; run `algokit bootstrap all` within this folder, which will run `npm install` to install NPM packages and dependencies for your frontend component/webapp.
-   - Run `algokit localnet start` to start a local Algorand network in Docker. If you are using VS Code launch configurations provided by the template, this will be done automatically for you.
-3. Open the project and start debugging / developing via:
-   - VS Code
-     1. Open the repository root in VS Code
-     2. Install recommended extensions
-     3. Hit F5 (or whatever you have debug mapped to) and it should start running with breakpoint debugging.
-   - JetBrains WebStorm
-     1. Open the repository root in WebStorm
-     2. Hit Shift+F10|Ctrl+R (or whatever you have debug mapped to). Then Shift+CMD|Ctrl+Click on the link in the console to open the browser with debugger attached.
-   - Other
-     1. Open the repository root in your text editor of choice
-     2. In a terminal run `npm run dev`
+#### 1. Clone the Repository
+Start by cloning this repository to your local machine.
 
-### Subsequently
+#### 2. Install Pre-requisites
+Ensure the following pre-requisites are installed and properly configured:
 
-1. If you update to the latest source code and there are new dependencies you will need to run `algokit bootstrap all` again
-2. Follow step 3 above
+- **npm**: Node package manager. Install from [Node.js Installation Guide](https://nodejs.org/en/download/). Verify with `npm -v` to see version `18.12`+.
+- **AlgoKit CLI**: Essential for project setup and operations. Install the latest version from [AlgoKit CLI Installation Guide](https://github.com/algorandfoundation/algokit-cli#install). Verify installation with `algokit --version`, expecting `2.0.0` or later.
+
+#### 3. Bootstrap Your Local Environment
+Run the following commands within the project folder:
+
+- **Install Project Dependencies**: With `algokit project bootstrap all`, ensure all dependencies are ready.
+
+### Development Workflow
+
+#### Terminal
+Directly manage and interact with your project using AlgoKit commands:
+
+1. **Build Contracts**: `algokit project run build` builds react web app and links with smart contracts in workspace, if any.
+2. Remaining set of command for linting, testing and deployment can be found in respective [package.json](./package.json) file and [.algokit.toml](./.algokit.toml) files.
+
+#### VS Code
+For a seamless experience with breakpoint debugging and other features:
+
+1. **Open Project**: In VS Code, open the repository root.
+2. **Install Extensions**: Follow prompts to install recommended extensions.
+3. **Debugging**:
+   - Use `F5` to start debugging.
+   - **Windows Users**: Select the Python interpreter at `./.venv/Scripts/python.exe` via `Ctrl/Cmd + Shift + P` > `Python: Select Interpreter` before the first run.
+
+#### Other IDEs
+While primarily optimized for VS Code, Jetbrains WebStorm has base support for this project:
+
+1. **Open Project**: In your JetBrains IDE, open the repository root.
+2. **Automatic Setup**: The IDE should configure the Python interpreter and virtual environment.
+3. **Debugging**: Use `Shift+F10` or `Ctrl+R` to start debugging. Note: Windows users may encounter issues with pre-launch tasks due to a known bug. See [JetBrains forums](https://youtrack.jetbrains.com/issue/IDEA-277486/Shell-script-configuration-cannot-run-as-before-launch-task) for workarounds.
+
+## AlgoKit Workspaces and Project Management
+This project supports both standalone and monorepo setups through AlgoKit workspaces. Leverage [`algokit project run`](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/project/run.md) commands for efficient monorepo project orchestration and management across multiple projects within a workspace.
 
 > Please note, by default frontend is pre configured to run against Algorand LocalNet. If you want to run against TestNet or MainNet, comment out the current environment variable and uncomment the relevant one in [`.env`](.env) file that is created after running bootstrap command and based on [`.env.template`](.env.template).
 
 ### Continuous Integration
 
-This project uses [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) to define CI workflows, which are located in the [`.github/workflows`](./.github/workflows) folder.
+This project uses [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) to define CI workflows, which are located in the [.github/workflows](`../../.github/workflows`) folder.
 
 For pull requests and pushes to `main` branch against this repository the following checks are automatically performed by GitHub Actions:
 
 - `install`: Installs dependencies using `npm`
 - `lint`: Lints the codebase using `ESLint`
 - `build`: Builds the codebase using `vite`
+
+> Please note, if you instantiated the project via `algokit init` without explicitly specifying the `--no-workspace` flag, we will automatically attempt to move the contents of the `.github` folder to the root of the workspace.
 
 ### Continuous Deployment
 
@@ -50,20 +70,24 @@ The project template provides base Github Actions workflows for continuous deplo
 
 #### Setting up environment variables and secrets for webapp deployment
 
-1. [Create a new environment variable on your repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository) called `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` if you are using Netlify as your cloud provider. Set it to the value of your Netlify auth token respectively. You can find your Netlify auth token by going to [app.netlify.com](https://app.netlify.com/).
-2. If you are using Vercel as your cloud provider, create a new environment variable on your repository called `VERCEL_TOKEN`. Set it to the value of your Vercel auth token. You can find your Vercel auth token by going to [vercel.com/account/tokens](https://vercel.com/account/tokens).
-3. Set up the environment variables. You can refer to the `.env.template` for default values. The variables to be set are:
-    - `VITE_ALGOD_SERVER`
-    - `VITE_ALGOD_NETWORK`
-    - `VITE_INDEXER_SERVER`
-    - `VITE_ENVIRONMENT` - (Set to either `production` or `development`)
-    - `VITE_ALGOD_PORT` - (This is optional if you are using a public gateway like AlgoNode)
-    - `VITE_INDEXER_PORT` - (This is optional if you are using a public gateway like AlgoNode)
-4. (Optional) If you need to set up environment secrets, you can do so by following the guide [here](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository). The variables for which you can set secrets are (refer to `.env.template` for default values):
-    - `VITE_ALGOD_TOKEN` - (This is optional if you are using a public gateway like AlgoNode)
-    - `VITE_INDEXER_TOKEN` - (This is optional if you are using a public gateway like AlgoNode)
+For Vercel:
+1. Retrieve your [Vercel Access Token](https://vercel.com/support/articles/how-do-i-use-a-vercel-api-access-token)
+2. Install the [Vercel CLI](https://vercel.com/cli) and run `vercel login`
+3. Inside your folder, run `vercel link` to create a new Vercel project
+4. Inside the generated `.vercel` folder, save the `projectId` and `orgId` from the `project.json`
+5. Inside GitHub, add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as [secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+6. Create an .env file containing ENV vars for the project (pointing to testnet or mainnet), drag and drop the .env file to upload initial batch of default environment variables to your vercel project.
+7. Upon invocation, CD pipeline will pull the VITE_ prefixed environment variables, build the project and deploy to the specified environment.
 
-> If you prefer alternative deployment methods, you can remove the relevant workflow files from the [`.github/workflows`](./.github/workflows) folder and configure your own.
+For Netlify:
+1. Retrieve your [Netlify Access Token](https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui)
+2. Inside your folder run `netlify login`
+3. Inside your folder run `netlify sites:create` to create a new site, obtain NETLIFY_SITE_ID from the output
+4. Inside GitHub, add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` as [secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+5. Define the VITE_ prefixed environment variables in netlify environment variables under site settings.
+6. Upon invocation, CD pipeline will build the project and deploy to the specified environment.
+
+> If you prefer alternative deployment methods, you can modify the relevant workflow files from the [`.github/workflows`](./.github/workflows) folder or modify deploy scripts in `.algokit.toml`.
 
 
 # Algorand Wallet integrations

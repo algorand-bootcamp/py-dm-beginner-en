@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  py-dm-beginner-en-contracts-validate:
+    name: Run py-dm-beginner-en-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/py-dm-beginner-en-contracts-ci.yaml
+
+  py-dm-beginner-en-contracts-release:
+    name: Run py-dm-beginner-en-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/py-dm-beginner-en-contracts-cd.yaml
+    needs: py-dm-beginner-en-contracts-validate
+
+  py-dm-beginner-en-frontend-validate:
+    name: Run py-dm-beginner-en-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/py-dm-beginner-en-frontend-ci.yaml
+
+  py-dm-beginner-en-frontend-release:
+    name: Run py-dm-beginner-en-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/py-dm-beginner-en-frontend-cd.yaml
+    needs: py-dm-beginner-en-frontend-validate

@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 2.0.11
+_src_path: gh:algorandfoundation/algokit-fullstack-template
+author_email: marco@lazystar.de
+author_name: lazystar
+cloud_provider: none
+contract_name: digital_marketplace
+deployment_language: python
+preset_name: production
+project_name: py-dm-beginner-en
+
