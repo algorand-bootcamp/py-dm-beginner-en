@@ -15,5 +15,5 @@
     }
   },
   "postCreateCommand": "pipx install algokit",
-  "postStartCommand": "algokit localnet start && echo 'Run algokit init in terminal to get started with Algorand development 🚀'"
+  "postStartCommand": "dockerd && algokit localnet start && echo 'Run algokit init in terminal to get started with Algorand development 🚀'"
 }
